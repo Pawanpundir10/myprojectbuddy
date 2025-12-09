@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, MessageCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, isToday, isYesterday, isSameDay } from "date-fns";
 
 interface Message {
   id: string;
@@ -119,29 +119,49 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
             <p className="text-sm text-muted-foreground/70">Be the first to say hello!</p>
           </div>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isOwn = message.sender_id === user?.id;
+            const messageDate = new Date(message.created_at);
+            const prevMessage = index > 0 ? messages[index - 1] : null;
+            const prevMessageDate = prevMessage ? new Date(prevMessage.created_at) : null;
+            
+            // Check if we need to show a date separator
+            const showDateSeparator = !prevMessageDate || !isSameDay(messageDate, prevMessageDate);
+            
+            // Get the date label
+            const getDateLabel = (date: Date): string => {
+              if (isToday(date)) return "Today";
+              if (isYesterday(date)) return "Yesterday";
+              return format(date, "MMMM d, yyyy");
+            };
+
             return (
-              <div
-                key={message.id}
-                className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                    isOwn
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-secondary text-secondary-foreground rounded-bl-md"
-                  }`}
-                >
-                  {!isOwn && (
-                    <p className="text-xs font-medium mb-1 opacity-70">
-                      {profiles[message.sender_id] || "Unknown"}
+              <div key={message.id}>
+                {showDateSeparator && (
+                  <div className="flex items-center justify-center my-4">
+                    <div className="bg-muted/80 text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full shadow-sm">
+                      {getDateLabel(messageDate)}
+                    </div>
+                  </div>
+                )}
+                <div className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                      isOwn
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : "bg-secondary text-secondary-foreground rounded-bl-md"
+                    }`}
+                  >
+                    {!isOwn && (
+                      <p className="text-xs font-medium mb-1 opacity-70">
+                        {profiles[message.sender_id] || "Unknown"}
+                      </p>
+                    )}
+                    <p className="text-sm leading-relaxed">{message.text}</p>
+                    <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                      {format(messageDate, "HH:mm")}
                     </p>
-                  )}
-                  <p className="text-sm leading-relaxed">{message.text}</p>
-                  <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                    {format(new Date(message.created_at), "HH:mm")}
-                  </p>
+                  </div>
                 </div>
               </div>
             );
