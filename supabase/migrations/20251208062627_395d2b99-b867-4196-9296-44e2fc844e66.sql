@@ -22,14 +22,16 @@ CREATE POLICY "Users can update own profile" ON public.profiles
 CREATE POLICY "Users can insert own profile" ON public.profiles
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
+CREATE POLICY "Service role can create profiles" ON public.profiles
+  FOR INSERT WITH CHECK (true);
+
 -- Create groups table
 CREATE TABLE public.groups (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_name TEXT NOT NULL,
-  supervisor_name TEXT NOT NULL,
-  skills_required TEXT[] DEFAULT '{}',
-  skills_needed TEXT[] DEFAULT '{}',
-  project_outcomes TEXT,
+  name TEXT NOT NULL,
+  description TEXT,
+  supervisor TEXT NOT NULL,
+  skills TEXT,
   max_members INTEGER DEFAULT 5,
   owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

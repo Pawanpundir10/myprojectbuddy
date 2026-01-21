@@ -6,8 +6,9 @@ import { Check, X, Clock, UserPlus } from "lucide-react";
 
 interface JoinRequest {
   id: string;
+  group_id: string;
   user_id: string;
-  status: string;
+  status: "pending" | "accepted" | "rejected";
   created_at: string;
 }
 
@@ -28,15 +29,21 @@ const JoinRequestsPanel = ({
 
   const pendingRequests = requests.filter((r) => r.status === "pending");
 
-  const handleRequest = async (requestId: string, userId: string, action: "accept" | "reject") => {
+  const handleRequest = async (
+    requestId: string,
+    userId: string,
+    action: "accept" | "reject"
+  ) => {
     setProcessing(requestId);
     try {
       if (action === "accept") {
         // Add user to group members
-        const { error: memberError } = await supabase.from("group_members").insert({
-          group_id: groupId,
-          user_id: userId,
-        });
+        const { error: memberError } = await supabase
+          .from("group_members")
+          .insert({
+            group_id: groupId,
+            user_id: userId,
+          });
 
         if (memberError) throw memberError;
       }
@@ -106,14 +113,20 @@ const JoinRequestsPanel = ({
               className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border"
             >
               <div>
-                <p className="font-medium text-foreground">{profile?.name || "Unknown"}</p>
-                <p className="text-sm text-muted-foreground">{profile?.email || "No email"}</p>
+                <p className="font-medium text-foreground">
+                  {profile?.name || "Unknown"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {profile?.email || "No email"}
+                </p>
               </div>
               <div className="flex gap-2">
                 <Button
                   variant="success"
                   size="sm"
-                  onClick={() => handleRequest(request.id, request.user_id, "accept")}
+                  onClick={() =>
+                    handleRequest(request.id, request.user_id, "accept")
+                  }
                   disabled={processing === request.id}
                 >
                   <Check className="h-4 w-4" />
@@ -121,7 +134,9 @@ const JoinRequestsPanel = ({
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleRequest(request.id, request.user_id, "reject")}
+                  onClick={() =>
+                    handleRequest(request.id, request.user_id, "reject")
+                  }
                   disabled={processing === request.id}
                 >
                   <X className="h-4 w-4" />

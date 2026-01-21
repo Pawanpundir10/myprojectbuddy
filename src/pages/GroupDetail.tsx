@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   ArrowLeft,
   Users,
   User,
@@ -24,11 +32,10 @@ import { format } from "date-fns";
 
 interface Group {
   id: string;
-  project_name: string;
-  supervisor_name: string;
-  skills_required: string[];
-  skills_needed: string[];
-  project_outcomes: string;
+  name: string;
+  supervisor: string;
+  skills: string;
+  description: string;
   max_members: number;
   owner_id: string;
   created_at: string;
@@ -61,6 +68,8 @@ const GroupDetail = () => {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const isOwner = group?.owner_id === user?.id;
   const isMember = members.some((m) => m.user_id === user?.id) || isOwner;
@@ -135,7 +144,10 @@ const GroupDetail = () => {
       console.error("Error fetching data:", error);
       toast({
         title: "Error",
-        description: "Failed to load group details.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to load group details.",
         variant: "destructive",
       });
     } finally {
@@ -206,6 +218,36 @@ const GroupDetail = () => {
     }
   };
 
+  const handleDeleteGroup = async () => {
+    if (!group) return;
+    setDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("groups")
+        .delete()
+        .eq("id", group.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Group Deleted",
+        description: "The group has been successfully deleted.",
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete group.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -250,11 +292,11 @@ const GroupDetail = () => {
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
                     <h1 className="text-2xl font-display font-bold text-foreground">
-                      {group.project_name}
+                      {group.name}
                     </h1>
                     <div className="flex items-center gap-2 mt-2 text-muted-foreground">
                       <User className="h-4 w-4" />
-                      <span>Supervised by {group.supervisor_name}</span>
+                      <span>Supervised by {group.supervisor}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-secondary">
@@ -265,37 +307,29 @@ const GroupDetail = () => {
                   </div>
                 </div>
 
-                {group.project_outcomes && (
+                {group.description && (
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-foreground">Project Outcomes</span>
+                      <span className="font-medium text-foreground">
+                        Project Outcomes
+                      </span>
                     </div>
-                    <p className="text-muted-foreground">{group.project_outcomes}</p>
+                    <p className="text-muted-foreground">{group.description}</p>
                   </div>
                 )}
 
                 {/* Skills */}
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                  {group.skills_required.length > 0 && (
+                  {group.skills && group.skills.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-foreground mb-2">Skills We Have</p>
+                      <p className="text-sm font-medium text-foreground mb-2">
+                        Skills
+                      </p>
                       <div className="flex flex-wrap gap-2">
-                        {group.skills_required.map((skill, i) => (
+                        {group.skills.split(",").map((skill, i) => (
                           <Badge key={i} variant="secondary">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {group.skills_needed.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-foreground mb-2">Skills We Need</p>
-                      <div className="flex flex-wrap gap-2">
-                        {group.skills_needed.map((skill, i) => (
-                          <Badge key={i} variant="outline" className="border-accent text-accent">
-                            {skill}
+                            {skill.trim()}
                           </Badge>
                         ))}
                       </div>
@@ -304,43 +338,66 @@ const GroupDetail = () => {
                 </div>
 
                 {/* Action buttons */}
-                {!isOwner && !isMember && !hasRequestedPending && !wasRejected && (
-                  <Button
-                    variant="gradient"
-                    size="lg"
-                    className="w-full sm:w-auto"
-                    onClick={handleJoinRequest}
-                    disabled={requesting}
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    {requesting ? "Sending..." : "Request to Join"}
-                  </Button>
-                )}
+                {!isOwner &&
+                  !isMember &&
+                  !hasRequestedPending &&
+                  !wasRejected && (
+                    <Button
+                      variant="gradient"
+                      size="lg"
+                      className="w-full sm:w-auto"
+                      onClick={handleJoinRequest}
+                      disabled={requesting}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      {requesting ? "Sending..." : "Request to Join"}
+                    </Button>
+                  )}
 
                 {hasRequestedPending && (
                   <div className="flex items-center gap-2 text-warning">
                     <Clock className="h-4 w-4" />
-                    <span className="font-medium">Your request is pending approval</span>
+                    <span className="font-medium">
+                      Your request is pending approval
+                    </span>
                   </div>
                 )}
 
                 {wasRejected && (
                   <div className="flex items-center gap-2 text-destructive">
                     <XCircle className="h-4 w-4" />
-                    <span className="font-medium">Your request was declined</span>
+                    <span className="font-medium">
+                      Your request was declined
+                    </span>
                   </div>
                 )}
 
                 {isMember && !isOwner && (
                   <div className="flex items-center gap-2 text-success">
                     <CheckCircle2 className="h-4 w-4" />
-                    <span className="font-medium">You're a member of this group</span>
+                    <span className="font-medium">
+                      You're a member of this group
+                    </span>
                   </div>
+                )}
+
+                {isOwner && (
+                  <Button
+                    variant="destructive"
+                    size="lg"
+                    className="w-full sm:w-auto mt-4"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Group
+                  </Button>
                 )}
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 pt-4 border-t border-border">
                   <Clock className="h-3.5 w-3.5" />
-                  <span>Created {format(new Date(group.created_at), "PPP")}</span>
+                  <span>
+                    Created {format(new Date(group.created_at), "PPP")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -418,6 +475,28 @@ const GroupDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Delete Group</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this group? This action cannot be
+            undone. All members will be removed and all group data will be
+            permanently deleted.
+          </AlertDialogDescription>
+          <div className="flex justify-end gap-3">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteGroup}
+              disabled={deleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete Group"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

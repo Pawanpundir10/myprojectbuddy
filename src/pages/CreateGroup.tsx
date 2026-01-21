@@ -13,10 +13,21 @@ import { Badge } from "@/components/ui/badge";
 import { z } from "zod";
 
 const groupSchema = z.object({
-  projectName: z.string().trim().min(3, "Project name must be at least 3 characters").max(100),
-  supervisorName: z.string().trim().min(2, "Supervisor name is required").max(100),
+  projectName: z
+    .string()
+    .trim()
+    .min(3, "Project name must be at least 3 characters")
+    .max(100),
+  supervisorName: z
+    .string()
+    .trim()
+    .min(2, "Supervisor name is required")
+    .max(100),
   projectOutcomes: z.string().max(1000, "Description is too long").optional(),
-  maxMembers: z.number().min(2, "Minimum 2 members").max(20, "Maximum 20 members"),
+  maxMembers: z
+    .number()
+    .min(2, "Minimum 2 members")
+    .max(20, "Maximum 20 members"),
 });
 
 const CreateGroup = () => {
@@ -145,7 +156,7 @@ const CreateGroup = () => {
               <Label htmlFor="projectName">Project Name *</Label>
               <Input
                 id="projectName"
-                placeholder="e.g., AI-Powered Study Assistant"
+                placeholder="e.g., Your Project Name"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 required
@@ -157,7 +168,7 @@ const CreateGroup = () => {
               <Label htmlFor="supervisorName">Supervisor Name *</Label>
               <Input
                 id="supervisorName"
-                placeholder="e.g., Dr. Jane Smith"
+                placeholder="e.g., Dr. xyz"
                 value={supervisorName}
                 onChange={(e) => setSupervisorName(e.target.value)}
                 required
@@ -169,10 +180,10 @@ const CreateGroup = () => {
               <Label htmlFor="projectOutcomes">Project Description</Label>
               <Textarea
                 id="projectOutcomes"
-                placeholder="Describe what your project aims to achieve..."
+                placeholder="Describe what your project aims to achieve...with Final Outcomes(Research Paper,WebApp,Patent)"
                 value={projectOutcomes}
                 onChange={(e) => setProjectOutcomes(e.target.value)}
-                rows={4}
+                rows={3}
               />
             </div>
 
@@ -182,7 +193,7 @@ const CreateGroup = () => {
                 id="maxMembers"
                 type="number"
                 min={2}
-                max={20}
+                max={5}
                 value={maxMembers}
                 onChange={(e) => setMaxMembers(parseInt(e.target.value) || 5)}
                 className="h-12 w-32"
@@ -190,16 +201,24 @@ const CreateGroup = () => {
             </div>
 
             <div className="space-y-3">
-              <Label>Skills Required (Team has)</Label>
+              <Label>Skills (Team has)</Label>
               <div className="flex gap-2">
                 <Input
                   placeholder="Add a skill..."
                   value={newSkillRequired}
                   onChange={(e) => setNewSkillRequired(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkillRequired())}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    (e.preventDefault(), addSkillRequired())
+                  }
                   className="h-10"
                 />
-                <Button type="button" variant="secondary" size="sm" onClick={addSkillRequired}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={addSkillRequired}
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -208,7 +227,10 @@ const CreateGroup = () => {
                   {skillsRequired.map((skill) => (
                     <Badge key={skill} variant="secondary" className="gap-1">
                       {skill}
-                      <button type="button" onClick={() => removeSkillRequired(skill)}>
+                      <button
+                        type="button"
+                        onClick={() => removeSkillRequired(skill)}
+                      >
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
@@ -224,19 +246,33 @@ const CreateGroup = () => {
                   placeholder="Add a skill you're looking for..."
                   value={newSkillNeeded}
                   onChange={(e) => setNewSkillNeeded(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkillNeeded())}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addSkillNeeded())
+                  }
                   className="h-10"
                 />
-                <Button type="button" variant="secondary" size="sm" onClick={addSkillNeeded}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={addSkillNeeded}
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
               {skillsNeeded.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {skillsNeeded.map((skill) => (
-                    <Badge key={skill} variant="outline" className="gap-1 border-accent text-accent">
+                    <Badge
+                      key={skill}
+                      variant="outline"
+                      className="gap-1 border-accent text-accent"
+                    >
                       {skill}
-                      <button type="button" onClick={() => removeSkillNeeded(skill)}>
+                      <button
+                        type="button"
+                        onClick={() => removeSkillNeeded(skill)}
+                      >
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>

@@ -32,7 +32,11 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
 
     // Subscribe to realtime messages
     const channel = supabase
-      .channel(`messages-${groupId}`)
+      .channel(`messages:group_id=eq.${groupId}`, {
+        config: {
+          broadcast: { self: true },
+        },
+      })
       .on(
         "postgres_changes",
         {
@@ -43,10 +47,21 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
         },
         (payload) => {
           const newMsg = payload.new as Message;
-          setMessages((prev) => [...prev, newMsg]);
+          console.log("New message received:", newMsg);
+          setMessages((prev) => {
+            // Avoid duplicates
+            const isDuplicate = prev.some(m => m.id === newMsg.id);
+            return isDuplicate ? prev : [...prev, newMsg];
+          });
+          scrollToBottom();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log("Subscription status:", status);
+        if (err) {
+          console.error("Subscription error:", err);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -58,18 +73,28 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
   }, [messages]);
 
   const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("group_id", groupId)
-      .order("created_at", { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("group_id", groupId)
+        .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching messages:", error);
-      return;
+      if (error) {
+        console.error("Error fetching messages:", error);
+        toast({
+          title: "Error loading messages",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Messages fetched:", data);
+      setMessages(data || []);
+    } catch (error) {
+      console.error("Unexpected error fetching messages:", error);
     }
-
-    setMessages(data || []);
   };
 
   const scrollToBottom = () => {
@@ -78,23 +103,31 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending) return;
+    if (!newMessage.trim() || sending || !user) return;
 
     setSending(true);
     try {
       const { error } = await supabase.from("messages").insert({
         group_id: groupId,
-        sender_id: user!.id,
+        sender_id: user.id,
         text: newMessage.trim(),
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error sending message:", error);
+        throw error;
+      }
       setNewMessage("");
+      console.log("Message sent successfully");
     } catch (error) {
       console.error("Error sending message:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to send message. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -116,18 +149,23 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageCircle className="h-12 w-12 text-muted-foreground/30 mb-3" />
             <p className="text-muted-foreground">No messages yet</p>
-            <p className="text-sm text-muted-foreground/70">Be the first to say hello!</p>
+            <p className="text-sm text-muted-foreground/70">
+              Be the first to say hello!
+            </p>
           </div>
         ) : (
           messages.map((message, index) => {
             const isOwn = message.sender_id === user?.id;
             const messageDate = new Date(message.created_at);
             const prevMessage = index > 0 ? messages[index - 1] : null;
-            const prevMessageDate = prevMessage ? new Date(prevMessage.created_at) : null;
-            
+            const prevMessageDate = prevMessage
+              ? new Date(prevMessage.created_at)
+              : null;
+
             // Check if we need to show a date separator
-            const showDateSeparator = !prevMessageDate || !isSameDay(messageDate, prevMessageDate);
-            
+            const showDateSeparator =
+              !prevMessageDate || !isSameDay(messageDate, prevMessageDate);
+
             // Get the date label
             const getDateLabel = (date: Date): string => {
               if (isToday(date)) return "Today";
@@ -144,7 +182,9 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
                     </div>
                   </div>
                 )}
-                <div className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                >
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                       isOwn
@@ -158,7 +198,13 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
                       </p>
                     )}
                     <p className="text-sm leading-relaxed">{message.text}</p>
-                    <p className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                    <p
+                      className={`text-xs mt-1 ${
+                        isOwn
+                          ? "text-primary-foreground/60"
+                          : "text-muted-foreground"
+                      }`}
+                    >
                       {format(messageDate, "HH:mm")}
                     </p>
                   </div>
@@ -170,7 +216,10 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="p-4 border-t border-border bg-muted/30">
+      <form
+        onSubmit={sendMessage}
+        className="p-4 border-t border-border bg-muted/30"
+      >
         <div className="flex gap-2">
           <Input
             placeholder="Type a message..."
@@ -179,7 +228,11 @@ const ChatBox = ({ groupId, profiles }: ChatBoxProps) => {
             className="flex-1"
             disabled={sending}
           />
-          <Button type="submit" variant="gradient" disabled={!newMessage.trim() || sending}>
+          <Button
+            type="submit"
+            variant="gradient"
+            disabled={!newMessage.trim() || sending}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>

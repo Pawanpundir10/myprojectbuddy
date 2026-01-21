@@ -1,7 +1,14 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Users, MessageCircle, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  MessageCircle,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 
 const Index = () => {
@@ -11,17 +18,20 @@ const Index = () => {
     {
       icon: Users,
       title: "Find Your Team",
-      description: "Browse project groups looking for members with your skills and interests.",
+      description:
+        "Browse project groups looking for members with your skills and interests.",
     },
     {
       icon: Sparkles,
       title: "Create Groups",
-      description: "Start your own project group and recruit talented students to join.",
+      description:
+        "Start your own project group and recruit talented students to join.",
     },
     {
       icon: MessageCircle,
       title: "Real-time Chat",
-      description: "Communicate instantly with your team through built-in group messaging.",
+      description:
+        "Communicate instantly with your team through built-in group messaging.",
     },
   ];
 
@@ -40,25 +50,37 @@ const Index = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
-        
+
         <div className="relative container mx-auto px-4 py-24 md:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur border border-primary-foreground/20 mb-8 animate-fade-in">
               <Sparkles className="h-4 w-4 text-accent" />
-              <span className="text-sm text-primary-foreground/90">The future of student collaboration</span>
+              <span className="text-sm text-primary-foreground/90">
+                The future of student collaboration
+              </span>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-display font-bold text-primary-foreground leading-tight mb-6 animate-slide-up">
               Connect, Collaborate,
               <br />
-              <span className="text-gradient bg-gradient-to-r from-accent to-primary-foreground">Create Together</span>
+              <span className="text-gradient bg-gradient-to-r from-accent to-primary-foreground">
+                Create Together
+              </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-primary-foreground/70 mb-10 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              Find your perfect project group, team up with skilled students, and bring your academic projects to life through seamless collaboration.
+            <p
+              className="text-lg md:text-xl text-primary-foreground/70 mb-10 max-w-2xl mx-auto animate-slide-up"
+              style={{ animationDelay: "0.1s" }}
+            >
+              Find your perfect project group, team up with skilled students,
+              and bring your academic projects to life through seamless
+              collaboration.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: "0.2s" }}>
+            <div
+              className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up"
+              style={{ animationDelay: "0.2s" }}
+            >
               {user ? (
                 <Button asChild variant="gradient" size="xl">
                   <Link to="/dashboard">
@@ -74,10 +96,13 @@ const Index = () => {
                       <ArrowRight className="h-5 w-5" />
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="xl" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                    <Link to="/auth">
-                      Sign In
-                    </Link>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="xl"
+                    className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  >
+                    <Link to="/auth">Sign In</Link>
                   </Button>
                 </>
               )}
@@ -87,8 +112,16 @@ const Index = () => {
 
         {/* Wave divider */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V120Z" fill="hsl(var(--background))" />
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full"
+          >
+            <path
+              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V120Z"
+              fill="hsl(var(--background))"
+            />
           </svg>
         </div>
       </section>
@@ -101,7 +134,8 @@ const Index = () => {
               Everything You Need to Succeed
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful tools designed for student collaboration and project management.
+              Powerful tools designed for student collaboration and project
+              management.
             </p>
           </div>
 
@@ -118,9 +152,7 @@ const Index = () => {
                 <h3 className="text-xl font-display font-bold text-foreground mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground">
-                  {feature.description}
-                </p>
+                <p className="text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -136,7 +168,9 @@ const Index = () => {
                 Why Students Love StudyHub
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Join thousands of students who are already using StudyHub to enhance their academic experience and build meaningful connections.
+                Join thousands of students who are already using StudyHub to
+                enhance their academic experience and build meaningful
+                connections.
               </p>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -157,8 +191,12 @@ const Index = () => {
                     <BookOpen className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-foreground">StudyHub</h3>
-                    <p className="text-sm text-muted-foreground">Student Collaboration Platform</p>
+                    <h3 className="font-display font-bold text-foreground">
+                      StudyHub
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Student Collaboration Platform
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -170,10 +208,12 @@ const Index = () => {
                   <div className="h-8 w-8 rounded-full bg-primary/20" />
                   <div className="h-8 w-8 rounded-full bg-accent/20 -ml-2" />
                   <div className="h-8 w-8 rounded-full bg-success/20 -ml-2" />
-                  <span className="text-sm text-muted-foreground ml-2 self-center">+50 students</span>
+                  <span className="text-sm text-muted-foreground ml-2 self-center">
+                    +50 students
+                  </span>
                 </div>
               </div>
-              
+
               {/* Decorative elements */}
               <div className="absolute -top-4 -right-4 h-24 w-24 bg-gradient-primary rounded-2xl opacity-10 blur-xl" />
               <div className="absolute -bottom-4 -left-4 h-20 w-20 bg-accent rounded-full opacity-10 blur-xl" />
@@ -187,15 +227,21 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="bg-gradient-hero rounded-3xl p-12 md:p-16 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
-            
+
             <div className="relative">
               <h2 className="text-3xl md:text-4xl font-display font-bold text-primary-foreground mb-4">
                 Ready to Start Collaborating?
               </h2>
               <p className="text-lg text-primary-foreground/70 mb-8 max-w-xl mx-auto">
-                Join StudyHub today and discover the power of student collaboration.
+                Join StudyHub today and discover the power of student
+                collaboration.
               </p>
-              <Button asChild variant="gradient" size="xl" className="bg-accent hover:bg-accent/90">
+              <Button
+                asChild
+                variant="gradient"
+                size="xl"
+                className="bg-accent hover:bg-accent/90"
+              >
                 <Link to={user ? "/dashboard" : "/auth"}>
                   {user ? "Go to Dashboard" : "Get Started Free"}
                   <ArrowRight className="h-5 w-5" />
@@ -212,7 +258,9 @@ const Index = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              <span className="font-display font-bold text-foreground">StudyHub</span>
+              <span className="font-display font-bold text-foreground">
+                StudyHub
+              </span>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2024 StudyHub. Built for students, by students.

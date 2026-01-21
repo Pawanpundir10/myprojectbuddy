@@ -11,11 +11,10 @@ import { toast } from "@/hooks/use-toast";
 
 interface Group {
   id: string;
-  project_name: string;
-  supervisor_name: string;
-  skills_required: string[];
-  skills_needed: string[];
-  project_outcomes: string;
+  name: string;
+  description: string;
+  supervisor: string;
+  skills: string;
   max_members: number;
   owner_id: string;
   created_at: string;
@@ -31,7 +30,9 @@ const Dashboard = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
-  const [userMemberships, setUserMemberships] = useState<Set<string>>(new Set());
+  const [userMemberships, setUserMemberships] = useState<Set<string>>(
+    new Set()
+  );
   const [userRequests, setUserRequests] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -91,19 +92,23 @@ const Dashboard = () => {
       setUserMemberships(new Set(userMemberData?.map((m) => m.group_id) || []));
 
       // Fetch user's pending requests
-      const { data: requestsData, error: requestsError } = await supabase
+      // Fetch user's pending requests (non-critical, continue if fails)
+      const { data: requestsData } = await supabase
         .from("join_requests")
         .select("group_id")
         .eq("user_id", user!.id)
         .eq("status", "pending");
 
-      if (requestsError) throw requestsError;
       setUserRequests(new Set(requestsData?.map((r) => r.group_id) || []));
     } catch (error) {
       console.error("Error fetching data:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to load groups. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to load groups. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -113,11 +118,13 @@ const Dashboard = () => {
 
   const filteredGroups = groups.filter((group) => {
     const search = searchTerm.toLowerCase();
+    const skillsArray = group.skills ? group.skills.split(",") : [];
+    const name = group.name || "";
+    const supervisor = group.supervisor || "";
     return (
-      group.project_name.toLowerCase().includes(search) ||
-      group.supervisor_name.toLowerCase().includes(search) ||
-      group.skills_required.some((s) => s.toLowerCase().includes(search)) ||
-      group.skills_needed.some((s) => s.toLowerCase().includes(search))
+      name.toLowerCase().includes(search) ||
+      supervisor.toLowerCase().includes(search) ||
+      skillsArray.some((s) => s.toLowerCase().trim().includes(search))
     );
   });
 
@@ -179,7 +186,9 @@ const Dashboard = () => {
                 <Users className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{groups.length}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {groups.length}
+                </p>
                 <p className="text-sm text-muted-foreground">Active Groups</p>
               </div>
             </div>
@@ -191,7 +200,12 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  {groups.filter((g) => g.owner_id === user?.id || userMemberships.has(g.id)).length}
+                  {
+                    groups.filter(
+                      (g) =>
+                        g.owner_id === user?.id || userMemberships.has(g.id)
+                    ).length
+                  }
                 </p>
                 <p className="text-sm text-muted-foreground">Your Groups</p>
               </div>
@@ -203,8 +217,12 @@ const Dashboard = () => {
                 <Filter className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{userRequests.size}</p>
-                <p className="text-sm text-muted-foreground">Pending Requests</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {userRequests.size}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Pending Requests
+                </p>
               </div>
             </div>
           </div>
@@ -217,13 +235,17 @@ const Dashboard = () => {
               <GroupCard
                 key={group.id}
                 id={group.id}
-                projectName={group.project_name}
-                supervisorName={group.supervisor_name}
-                skillsRequired={group.skills_required}
-                skillsNeeded={group.skills_needed}
-                projectOutcomes={group.project_outcomes}
+                projectName={group.name}
+                supervisorName={group.supervisor}
+                skillsRequired={
+                  group.skills
+                    ? group.skills.split(",").map((s) => s.trim())
+                    : []
+                }
+                skillsNeeded={[]}
+                projectOutcomes={group.description || ""}
                 memberCount={memberCounts[group.id] || 1}
-                maxMembers={group.max_members}
+                maxMembers={group.max_members || 5}
                 ownerName={profiles[group.owner_id] || "Unknown"}
                 isOwner={group.owner_id === user?.id}
                 isMember={userMemberships.has(group.id)}

@@ -36,7 +36,7 @@ const GroupCard = ({
     <div className="group relative bg-card rounded-xl border border-border shadow-card hover:shadow-lg transition-all duration-300 overflow-hidden">
       {/* Top accent bar */}
       <div className="h-1 bg-gradient-primary" />
-      
+
       <div className="p-6 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
@@ -49,10 +49,12 @@ const GroupCard = ({
               <span>Supervised by {supervisorName}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium">
             <Users className="h-3.5 w-3.5" />
-            <span>{memberCount}/{maxMembers}</span>
+            <span>
+              {memberCount}/{maxMembers}
+            </span>
           </div>
         </div>
 
@@ -87,12 +89,26 @@ const GroupCard = ({
           </div>
 
           <Link to={`/group/${id}`}>
-            <Button 
-              variant={isOwner ? "default" : isMember ? "secondary" : hasRequested ? "outline" : "gradient"}
+            <Button
+              variant={
+                isOwner
+                  ? "default"
+                  : isMember
+                  ? "secondary"
+                  : hasRequested
+                  ? "outline"
+                  : "gradient"
+              }
               size="sm"
               className="gap-1"
             >
-              {isOwner ? "Manage" : isMember ? "View Chat" : hasRequested ? "Pending" : "View"}
+              {isOwner
+                ? "Manage"
+                : isMember
+                ? "View Chat"
+                : hasRequested
+                ? "Pending"
+                : "View"}
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
